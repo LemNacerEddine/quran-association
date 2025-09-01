@@ -1,30 +1,35 @@
-import { Text, View, StyleSheet, Image } from "react-native";
+import React from 'react';
+import { View, StyleSheet, I18nManager } from 'react-native';
+import { useAuth } from '../src/context/AuthContext';
+import { Redirect } from 'expo-router';
+import LoadingScreen from '../src/components/LoadingScreen';
 
-const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+// Enable RTL for Arabic
+I18nManager.allowRTL(true);
+I18nManager.forceRTL(true);
 
 export default function Index() {
-  console.log(EXPO_PUBLIC_BACKEND_URL, "EXPO_PUBLIC_BACKEND_URL");
+  const { user, userType, isLoading } = useAuth();
 
-  return (
-    <View style={styles.container}>
-      <Image
-        source={require("../assets/images/app-image.png")}
-        style={styles.image}
-      />
-    </View>
-  );
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  // If user is authenticated, redirect to appropriate dashboard
+  if (user && userType) {
+    if (userType === 'parent') {
+      return <Redirect href="/parent" />;
+    } else if (userType === 'teacher') {
+      return <Redirect href="/teacher" />;
+    }
+  }
+
+  // If not authenticated, show auth flow
+  return <Redirect href="/auth" />;
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0c0c0c",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
   },
 });
