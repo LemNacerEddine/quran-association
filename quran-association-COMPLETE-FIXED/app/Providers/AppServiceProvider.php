@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        // Force HTTPS URLs in production
+        if (config('app.env') !== 'local') {
+            URL::forceScheme('https');
+        }
+        
+        // Force HTTPS for proxied domains
+        if (request()->header('x-forwarded-proto') === 'https' || 
+            str_contains(request()->getHost(), 'manusvm.computer')) {
+            URL::forceScheme('https');
+        }
+    }
+}
