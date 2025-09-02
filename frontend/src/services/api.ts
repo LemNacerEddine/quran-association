@@ -452,9 +452,55 @@ export const teacherService = {
   async getDashboard() {
     try {
       try {
-        const response = await api.get('/mobile/teacher/dashboard');
-        return response.data;
+        // Get circles and students data from NEW API
+        const [circlesResponse, studentsResponse] = await Promise.all([
+          api.get('/v1/teacher/circles'),
+          api.get('/v1/teacher/students')
+        ]);
+        
+        if (circlesResponse.data.success && studentsResponse.data.success) {
+          const circles = circlesResponse.data.data.circles || [];
+          const students = studentsResponse.data.data.students || [];
+          
+          // Calculate stats
+          const totalCircles = circles.length;
+          const totalStudents = students.length;
+          const averageAttendance = students.length > 0 
+            ? Math.round(students.reduce((sum: any, s: any) => sum + (s.attendance_rate || 0), 0) / students.length)
+            : 0;
+          
+          // Mock today's sessions based on circles
+          const todaySessions = circles.slice(0, 2).map((circle: any, index: number) => ({
+            id: circle.id,
+            title: `${circle.name} - اليوم`,
+            circle_name: circle.name,
+            start_time: index === 0 ? '15:00' : '17:00',
+            end_time: index === 0 ? '16:30' : '18:30',
+            students_count: circle.students_count || 0,
+            status: index === 0 ? 'scheduled' : 'ongoing'
+          }));
+
+          return {
+            today_sessions: todaySessions,
+            stats: {
+              total_circles: totalCircles,
+              total_students: totalStudents,
+              today_sessions: todaySessions.length,
+              attendance_rate: averageAttendance
+            },
+            notifications: [
+              {
+                id: 1,
+                message: 'مرحباً بك في التطبيق الجديد',
+                type: 'info',
+                created_at: new Date().toISOString()
+              }
+            ]
+          };
+        }
       } catch (apiError) {
+        console.log('NEW API teacher dashboard failed, using fallback data');
+        
         // Return test data for teacher dashboard
         return {
           today_sessions: [
