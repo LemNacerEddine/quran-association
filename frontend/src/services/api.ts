@@ -71,60 +71,81 @@ const TEST_TEACHERS = [
 export const authService = {
   async login(phone: string, password: string, userType: 'parent' | 'teacher') {
     try {
-      console.log('Attempting login with:', { phone, userType, password });
+      console.log('Attempting login with NEW API v1:', { phone, userType });
       
-      // Test with local data first (since Laravel API is not accessible)
-      if (userType === 'parent') {
-        const guardian = TEST_GUARDIANS.find(g => g.phone === phone && g.access_code === password);
-        if (guardian) {
-          const userData = {
-            id: 1,
-            name: guardian.name,
-            phone: guardian.phone,
-            type: 'parent' as const,
-          };
-          
-          return {
-            success: true,
-            data: {
-              token: 'test-token-' + Date.now(),
-              user: userData,
-            },
-          };
-        }
-      } else if (userType === 'teacher') {
-        const teacher = TEST_TEACHERS.find(t => t.phone === phone && t.password === password);
-        if (teacher) {
-          const userData = {
-            id: 1,
-            name: teacher.name,
-            phone: teacher.phone,
-            type: 'teacher' as const,
-          };
-          
-          return {
-            success: true,
-            data: {
-              token: 'test-token-' + Date.now(),
-              user: userData,
-            },
-          };
-        }
-      }
-
-      // If test data doesn't match, try API
-      const endpoint = '/mobile/auth/login';
+      // Try NEW API v1 endpoints first
+      const endpoint = userType === 'parent' ? '/v1/guardian/login' : '/v1/teacher/login';
       const payload = userType === 'parent' 
-        ? { phone, access_code: password, user_type: 'guardian' }
-        : { phone, password, user_type: 'teacher' };
+        ? { phone, access_code: password }
+        : { phone, password };
 
-      const response = await api.post(endpoint, payload);
-      console.log('Login response:', response.data);
+      try {
+        const response = await api.post(endpoint, payload);
+        console.log('NEW API Login success:', response.data);
 
-      return {
-        success: true,
-        data: response.data,
-      };
+        if (response.data.success && response.data.data) {
+          const { data } = response.data;
+          const userData = {
+            id: data.guardian?.id || data.teacher?.id,
+            name: data.guardian?.name || data.teacher?.name,
+            phone: data.guardian?.phone || data.teacher?.phone,
+            type: userType === 'parent' ? 'parent' as const : 'teacher' as const,
+            email: data.guardian?.email || data.teacher?.email,
+          };
+
+          return {
+            success: true,
+            data: {
+              token: data.token,
+              user: userData,
+            },
+          };
+        }
+      } catch (apiError: any) {
+        console.log('NEW API failed, trying fallback data:', apiError.response?.data?.message);
+        
+        // Fallback to test data
+        if (userType === 'parent') {
+          const guardian = TEST_GUARDIANS.find(g => g.phone === phone && g.access_code === password);
+          if (guardian) {
+            const userData = {
+              id: 1,
+              name: guardian.name,
+              phone: guardian.phone,
+              type: 'parent' as const,
+            };
+            
+            return {
+              success: true,
+              data: {
+                token: 'test-token-' + Date.now(),
+                user: userData,
+              },
+            };
+          }
+        } else if (userType === 'teacher') {
+          const teacher = TEST_TEACHERS.find(t => t.phone === phone && t.password === password);
+          if (teacher) {
+            const userData = {
+              id: 1,
+              name: teacher.name,
+              phone: teacher.phone,
+              type: 'teacher' as const,
+            };
+            
+            return {
+              success: true,
+              data: {
+                token: 'test-token-' + Date.now(),
+                user: userData,
+              },
+            };
+          }
+        }
+        
+        // If neither API nor test data work
+        throw apiError;
+      }
     } catch (error: any) {
       console.error('Login error:', error.response?.data || error.message);
       return {
@@ -136,7 +157,7 @@ export const authService = {
 
   async logout() {
     try {
-      await api.post('/auth/logout');
+      await api.post('/v1/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
     }
