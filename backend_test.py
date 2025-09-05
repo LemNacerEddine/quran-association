@@ -1104,12 +1104,52 @@ class QuranAssociationAPITester:
         else:
             print("  ✅ Laravel API endpoints are available")
         
+        # Check attendance notification system
+        fcm_tests = [r for r in self.test_results if 'FCM' in r['test']]
+        fcm_success = all(r['success'] for r in fcm_tests)
+        
+        attendance_tests = [r for r in self.test_results if 'Attendance' in r['test'] and 'Notification' in r['test']]
+        attendance_success = all(r['success'] for r in attendance_tests)
+        
+        notification_tests = [r for r in self.test_results if 'Notification Content' in r['test']]
+        notification_success = all(r['success'] for r in notification_tests)
+        
+        mapping_tests = [r for r in self.test_results if 'Student-Parent Mapping' in r['test']]
+        mapping_success = all(r['success'] for r in mapping_tests)
+        
+        if fcm_success:
+            print("  ✅ FCM Token Registration working correctly")
+        else:
+            print("  ❌ FCM Token Registration has issues")
+            
+        if attendance_success:
+            print("  ✅ Attendance marking and notifications working correctly")
+        else:
+            print("  ❌ Attendance marking and notifications have issues")
+            
+        if notification_success:
+            print("  ✅ Notification content verification passed")
+        else:
+            print("  ❌ Notification content verification failed")
+            
+        if mapping_success:
+            print("  ✅ Student-parent mapping working correctly")
+        else:
+            print("  ❌ Student-parent mapping has issues")
+        
         print()
         print("🎯 CONCLUSION:")
         if ahmed_success and mohammed_success:
             print("  ✅ API Integration Fix SUCCESSFUL - Parent-child relationships are now correct!")
         else:
             print("  ❌ API Integration Fix needs attention - Some relationships are still incorrect")
+            
+        # Attendance notification system conclusion
+        attendance_system_success = fcm_success and attendance_success and notification_success
+        if attendance_system_success:
+            print("  ✅ ATTENDANCE NOTIFICATION SYSTEM SUCCESSFUL - All components working correctly!")
+        else:
+            print("  ❌ Attendance notification system needs attention - Some components have issues")
         
         return passed_tests == total_tests
 
