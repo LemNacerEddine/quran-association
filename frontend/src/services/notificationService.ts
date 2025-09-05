@@ -44,28 +44,81 @@ class NotificationService {
     try {
       let token = null;
 
-      if (Device.isDevice) {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
+      // Check if we're on a physical device
+      if (!Device.isDevice) {
+        console.log('📱 Must use physical device for Push Notifications');
+        showMessage({
+          message: 'تنبيه',
+          description: 'الإشعارات تعمل فقط على الأجهزة الحقيقية، وليس المحاكي',
+          type: 'info',
+        });
+        // For web/simulator, still create a mock token for testing
+        this.expoPushToken = 'expo-mock-token-' + Date.now();
+        await AsyncStorage.setItem('expo_push_token', this.expoPushToken);
+        return this.expoPushToken;
+      }
 
-        if (existingStatus !== 'granted') {
-          const { status } = await Notifications.requestPermissionsAsync();
-          finalStatus = status;
-        }
+      console.log('📱 Device detected, requesting permissions...');
 
-        if (finalStatus !== 'granted') {
-          showMessage({
-            message: 'تحذير',
-            description: 'لم يتم منح إذن الإشعارات',
-            type: 'warning',
-          });
-          return null;
-        }
+      // Check current permission status
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      console.log('📋 Current permission status:', existingStatus);
 
+      let finalStatus = existingStatus;
+
+      // If not granted, request permissions with specific options
+      if (existingStatus !== 'granted') {
+        console.log('🔔 Requesting notification permissions...');
+        
+        const { status } = await Notifications.requestPermissionsAsync({
+          ios: {
+            allowAlert: true,
+            allowBadge: true,
+            allowSound: true,
+            allowAnnouncements: true,
+          },
+          android: {
+            // Request all Android permissions
+          }
+        });
+        
+        finalStatus = status;
+        console.log('📨 Permission request result:', status);
+      }
+
+      // Check if permission was granted
+      if (finalStatus !== 'granted') {
+        console.error('❌ Permission denied:', finalStatus);
+        showMessage({
+          message: 'إذن الإشعارات مرفوض',
+          description: 'يرجى الذهاب إلى إعدادات الجهاز وتفعيل الإشعارات للتطبيق يدوياً',
+          type: 'warning',
+          duration: 5000,
+        });
+        return null;
+      }
+
+      console.log('✅ Permission granted, generating push token...');
+
+      // Configure Android notification channels BEFORE getting token
+      if (Platform.OS === 'android') {
+        await this.createNotificationChannels();
+      }
+
+      try {
         // Get the Expo push token
-        token = (await Notifications.getExpoPushTokenAsync({
-          projectId: Constants.expoConfig?.extra?.eas?.projectId || '631091388007',
-        })).data;
+        const projectId = Constants.expoConfig?.extra?.eas?.projectId || 
+                          Constants.easConfig?.projectId || 
+                          '631091388007';
+        
+        console.log('🔑 Using project ID:', projectId);
+        
+        const tokenResult = await Notifications.getExpoPushTokenAsync({
+          projectId: projectId,
+        });
+
+        token = tokenResult.data;
+        console.log('🎯 Push token generated:', token.substring(0, 30) + '...');
 
         this.expoPushToken = token;
 
@@ -75,28 +128,31 @@ class NotificationService {
         // Send token to server
         await this.sendTokenToServer(token);
 
-        console.log('🎯 Push token registered:', token.substring(0, 20) + '...');
-      } else {
-        console.log('📱 Must use physical device for Push Notifications');
-      }
-
-      // Android specific configuration
-      if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
-          name: 'Default',
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#2c5530',
-          sound: 'default',
+        showMessage({
+          message: 'تم تفعيل الإشعارات',
+          description: 'سيتم إرسال الإشعارات إلى جهازك',
+          type: 'success',
         });
 
-        // Create specific notification channels
-        await this.createNotificationChannels();
+        console.log('✅ Push token registered successfully');
+      } catch (tokenError) {
+        console.error('❌ Error getting push token:', tokenError);
+        showMessage({
+          message: 'خطأ في توليد رمز الإشعارات',
+          description: 'تم تفعيل الإذن لكن فشل في توليد رمز الجهاز',
+          type: 'warning',
+        });
+        return null;
       }
 
       return token;
     } catch (error) {
       console.error('❌ Error registering for push notifications:', error);
+      showMessage({
+        message: 'خطأ في تفعيل الإشعارات',
+        description: 'حدث خطأ أثناء تفعيل الإشعارات: ' + error.message,
+        type: 'danger',
+      });
       return null;
     }
   }
