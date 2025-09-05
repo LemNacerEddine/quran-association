@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { notificationService as apiNotificationService } from '../services/api';
+import { notificationAPIService } from '../services/api';
 import notificationService from '../services/notificationService';
 import { showMessage } from 'react-native-flash-message';
 
@@ -21,13 +21,30 @@ export function useNotifications() {
   const loadNotifications = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await apiNotificationService.getNotificationHistory();
+      
+      // Try Laravel FCM API first
+      const response = await notificationAPIService.getNotifications();
       
       if (response.success && response.data) {
-        setNotifications(response.data);
-        const unread = response.data.filter((n: Notification) => !n.isRead).length;
+        // Map Laravel response to our notification format
+        const mappedNotifications = response.data.map((notification: any) => ({
+          id: notification.id.toString(),
+          title: notification.title,
+          body: notification.body,
+          type: notification.type || 'general',
+          timestamp: notification.created_at,
+          isRead: notification.is_read || false,
+          data: notification.data ? JSON.parse(notification.data) : null,
+        }));
+        
+        setNotifications(mappedNotifications);
+        const unread = mappedNotifications.filter((n: Notification) => !n.isRead).length;
         setUnreadCount(unread);
+        
+        console.log('✅ Loaded notifications from Laravel API:', mappedNotifications.length);
       } else {
+        console.log('⚠️ Laravel API failed, using mock data');
+        
         // Use mock data for testing
         const mockNotifications: Notification[] = [
           {
@@ -80,26 +97,39 @@ export function useNotifications() {
     }
   }, []);
 
+  const loadUnreadCount = useCallback(async () => {
+    try {
+      const response = await notificationAPIService.getUnreadCount();
+      if (response.success) {
+        setUnreadCount(response.count || 0);
+      }
+    } catch (error) {
+      console.error('Error loading unread count:', error);
+    }
+  }, []);
+
   const markAsRead = useCallback(async (notificationId: string) => {
     try {
-      await apiNotificationService.markNotificationAsRead(notificationId);
+      const response = await notificationAPIService.markAsRead(notificationId);
       
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification.id === notificationId 
-            ? { ...notification, isRead: true }
-            : notification
-        )
-      );
-      
-      setUnreadCount(prev => Math.max(0, prev - 1));
-      
-      showMessage({
-        message: 'تم',
-        description: 'تم وضع علامة مقروء على الإشعار',
-        type: 'success',
-        duration: 2000,
-      });
+      if (response.success) {
+        setNotifications(prev => 
+          prev.map(notification => 
+            notification.id === notificationId 
+              ? { ...notification, isRead: true }
+              : notification
+          )
+        );
+        
+        setUnreadCount(prev => Math.max(0, prev - 1));
+        
+        showMessage({
+          message: 'تم',
+          description: 'تم وضع علامة مقروء على الإشعار',
+          type: 'success',
+          duration: 2000,
+        });
+      }
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -107,42 +137,72 @@ export function useNotifications() {
 
   const markAllAsRead = useCallback(async () => {
     try {
-      const unreadNotifications = notifications.filter(n => !n.isRead);
+      const response = await notificationAPIService.markAllAsRead();
       
-      // Mark all as read in parallel
-      await Promise.all(
-        unreadNotifications.map(notification => 
-          apiNotificationService.markNotificationAsRead(notification.id)
-        )
-      );
-      
-      setNotifications(prev => 
-        prev.map(notification => ({ ...notification, isRead: true }))
-      );
-      
-      setUnreadCount(0);
-      
-      showMessage({
-        message: 'تم',
-        description: 'تم وضع علامة مقروء على جميع الإشعارات',
-        type: 'success',
-      });
+      if (response.success) {
+        setNotifications(prev => 
+          prev.map(notification => ({ ...notification, isRead: true }))
+        );
+        
+        setUnreadCount(0);
+        
+        showMessage({
+          message: 'تم',
+          description: 'تم وضع علامة مقروء على جميع الإشعارات',
+          type: 'success',
+        });
+      }
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
-  }, [notifications]);
+  }, []);
 
-  const sendTestNotification = useCallback(() => {
-    notificationService.sendLocalNotification({
-      title: 'اختبار الإشعارات',
-      body: 'هذا إشعار تجريبي للتأكد من عمل النظام',
-      priority: 'high',
-      category: 'general',
-    });
+  const sendTestNotification = useCallback(async () => {
+    try {
+      // Get current push token
+      const pushToken = notificationService.getExpoPushToken();
+      
+      if (pushToken) {
+        // Test with Laravel FCM API
+        const response = await notificationAPIService.testNotification(
+          pushToken,
+          'اختبار الإشعارات',
+          'هذا إشعار تجريبي من Laravel FCM API'
+        );
+        
+        if (response.success) {
+          showMessage({
+            message: 'تم إرسال الإشعار التجريبي',
+            description: 'تحقق من الإشعارات',
+            type: 'success',
+          });
+        } else {
+          throw new Error('Laravel API test failed');
+        }
+      } else {
+        // Fallback to local notification
+        notificationService.sendLocalNotification({
+          title: 'اختبار الإشعارات المحلية',
+          body: 'هذا إشعار محلي للتأكد من عمل النظام',
+          priority: 'high',
+          category: 'general',
+        });
+      }
+    } catch (error) {
+      console.error('Test notification error:', error);
+      
+      // Fallback to local notification
+      notificationService.sendLocalNotification({
+        title: 'اختبار الإشعارات',
+        body: 'هذا إشعار محلي - Laravel API غير متاح',
+        priority: 'high',
+        category: 'general',
+      });
+    }
   }, []);
 
   const scheduleSessionReminder = useCallback((sessionTitle: string, sessionTime: Date) => {
-    // Schedule reminder 1 hour before session
+    // Schedule local reminder 1 hour before session
     const reminderTime = new Date(sessionTime.getTime() - 60 * 60 * 1000);
     
     notificationService.scheduleReminder(
@@ -155,13 +215,15 @@ export function useNotifications() {
 
   useEffect(() => {
     loadNotifications();
-  }, [loadNotifications]);
+    loadUnreadCount();
+  }, [loadNotifications, loadUnreadCount]);
 
   return {
     notifications,
     isLoading,
     unreadCount,
     loadNotifications,
+    loadUnreadCount,
     markAsRead,
     markAllAsRead,
     sendTestNotification,
