@@ -864,4 +864,83 @@ export const teacherService = {
   },
 };
 
+// Notification service
+export const notificationService = {
+  async registerToken(tokenData: any) {
+    try {
+      const response = await api.post('/v1/notifications/register-token', tokenData);
+      return response.data;
+    } catch (error) {
+      console.error('Register token error:', error);
+      // Don't throw error, just log it
+      return { success: false };
+    }
+  },
+
+  async updateNotificationSettings(settings: any) {
+    try {
+      const response = await api.put('/v1/notifications/settings', settings);
+      return response.data;
+    } catch (error) {
+      console.error('Update notification settings error:', error);
+      return { success: false };
+    }
+  },
+
+  async getNotificationHistory() {
+    try {
+      const response = await api.get('/v1/notifications/history');
+      return response.data;
+    } catch (error) {
+      console.error('Get notification history error:', error);
+      return { success: false, data: [] };
+    }
+  },
+
+  async markNotificationAsRead(notificationId: string) {
+    try {
+      const response = await api.put(`/v1/notifications/${notificationId}/read`);
+      return response.data;
+    } catch (error) {
+      console.error('Mark notification as read error:', error);
+      return { success: false };
+    }
+  },
+
+  // Send attendance notification
+  async sendAttendanceNotification(studentId: number, attendanceData: any) {
+    try {
+      const response = await api.post(`/v1/notifications/attendance/${studentId}`, attendanceData);
+      return response.data;
+    } catch (error) {
+      console.error('Send attendance notification error:', error);
+      return { success: false };
+    }
+  },
+
+  // Send session reminder
+  async sendSessionReminder(sessionId: number, reminderTime: string) {
+    try {
+      const response = await api.post(`/v1/notifications/session-reminder/${sessionId}`, {
+        reminder_time: reminderTime
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Send session reminder error:', error);
+      return { success: false };
+    }
+  },
+
+  // Send message notification
+  async sendMessageNotification(recipientId: number, messageData: any) {
+    try {
+      const response = await api.post(`/v1/notifications/message/${recipientId}`, messageData);
+      return response.data;
+    } catch (error) {
+      console.error('Send message notification error:', error);
+      return { success: false };
+    }
+  },
+};
+
 export default api;
