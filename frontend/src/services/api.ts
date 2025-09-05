@@ -2,10 +2,8 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showMessage } from 'react-native-flash-message';
 
-// Get API URL from environment - Use local Laravel proxy that connects to real database
-const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL ? 
-  `${process.env.EXPO_PUBLIC_BACKEND_URL.replace('/api', '')}:8002` : 
-  'http://localhost:8002';
+// Get API URL from environment - Use main backend with Laravel proxy endpoints
+const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:8001/api';
 
 console.log('API_BASE_URL:', API_BASE_URL);
 
