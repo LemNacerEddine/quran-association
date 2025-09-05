@@ -32,6 +32,7 @@ interface Child {
 
 export default function ChildrenScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
