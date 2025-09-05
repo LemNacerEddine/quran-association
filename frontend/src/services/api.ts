@@ -2,8 +2,10 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showMessage } from 'react-native-flash-message';
 
-// Get API URL from environment
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://vpdeveloper.dz/quran-association/api';
+// Get API URL from environment - Use local Laravel proxy that connects to real database
+const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL ? 
+  `${process.env.EXPO_PUBLIC_BACKEND_URL}/api` : 
+  'http://localhost:8002';
 
 console.log('API_BASE_URL:', API_BASE_URL);
 
