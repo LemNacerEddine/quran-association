@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/api';
+import notificationService from '../services/notificationService';
 
 export type UserType = 'parent' | 'teacher' | null;
 
@@ -42,7 +43,15 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     checkAuthState();
+    initializeNotifications();
   }, []);
+
+  useEffect(() => {
+    // Initialize notifications when user logs in
+    if (user && userType) {
+      initializeNotifications();
+    }
+  }, [user, userType]);
 
   const checkAuthState = async () => {
     try {
@@ -63,6 +72,15 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const initializeNotifications = async () => {
+    try {
+      await notificationService.initialize();
+      console.log('🔔 Notifications initialized for authenticated user');
+    } catch (error) {
+      console.error('❌ Failed to initialize notifications:', error);
+    }
+  };
+
   const login = async (phone: string, password: string, type: UserType): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -79,6 +97,12 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
         setUser(userData);
         setUserTypeState(type);
+
+        // Initialize notifications after successful login
+        setTimeout(() => {
+          initializeNotifications();
+        }, 1000);
+
         return true;
       }
       return false;
@@ -93,7 +117,11 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const logout = async () => {
     try {
       setIsLoading(true);
-      await AsyncStorage.multiRemove(['auth_token', 'user_data', 'user_type']);
+      
+      // Cleanup notifications
+      notificationService.cleanup();
+      
+      await AsyncStorage.multiRemove(['auth_token', 'user_data', 'user_type', 'expo_push_token']);
       setUser(null);
       setUserTypeState(null);
     } catch (error) {
