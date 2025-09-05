@@ -85,22 +85,36 @@ export default function NotificationManager() {
 
   const requestPermissions = async () => {
     try {
-      await notificationService.registerForPushNotifications();
-      await checkNotificationStatus();
+      console.log('🔔 Requesting notification permissions...');
       
-      if (isEnabled) {
-        showMessage({
-          message: t('success'),
-          description: 'تم تفعيل الإشعارات بنجاح',
-          type: 'success',
-        });
-      }
+      const token = await notificationService.registerForPushNotifications();
+      
+      // Check status after attempting to register
+      setTimeout(async () => {
+        await checkNotificationStatus();
+        
+        const newNotificationSettings = await notificationService.getNotificationSettings();
+        const hasPermission = newNotificationSettings?.granted || token !== null;
+        
+        if (hasPermission) {
+          console.log('✅ Notifications enabled successfully');
+          setIsEnabled(true);
+          setPushToken(token);
+        } else {
+          console.log('❌ Notifications permission denied');
+          setIsEnabled(false);
+          setPushToken(null);
+        }
+      }, 1000);
+      
     } catch (error) {
+      console.error('❌ Error requesting permissions:', error);
       showMessage({
         message: t('error'),
-        description: 'فشل في تفعيل الإشعارات',
+        description: 'فشل في تفعيل الإشعارات: ' + error.message,
         type: 'danger',
       });
+      setIsEnabled(false);
     }
   };
 
