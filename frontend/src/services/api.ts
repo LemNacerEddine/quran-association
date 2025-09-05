@@ -602,9 +602,10 @@ export const teacherService = {
         // Get dashboard data from Laravel mobile API
         const dashboardResponse = await api.get('/mobile/teacher/dashboard');
         
-        if (circlesResponse.data.success && studentsResponse.data.success) {
-          const circles = circlesResponse.data.data.circles || [];
-          const students = studentsResponse.data.data.students || [];
+        if (dashboardResponse.data.success && dashboardResponse.data.data) {
+          const dashboardData = dashboardResponse.data.data;
+          const circles = dashboardData.circles || [];
+          const students = dashboardData.students || [];
           
           // Calculate stats
           const totalCircles = circles.length;
