@@ -233,15 +233,28 @@ export default function NotificationManager() {
                   : 'قم بتفعيل الإشعارات لتلقي التنبيهات'
                 }
               </Text>
+              {pushToken && (
+                <Text style={styles.tokenInfo}>
+                  Token: {pushToken.substring(0, 20)}...
+                </Text>
+              )}
             </View>
-            {!isEnabled && (
-              <TouchableOpacity
-                style={styles.enableButton}
-                onPress={requestPermissions}
-              >
-                <Text style={styles.enableButtonText}>تفعيل</Text>
-              </TouchableOpacity>
-            )}
+            <View style={styles.statusActions}>
+              {!isEnabled && (
+                <TouchableOpacity
+                  style={styles.enableButton}
+                  onPress={requestPermissions}
+                >
+                  <Text style={styles.enableButtonText}>تفعيل</Text>
+                </TouchableOpacity>
+              )}
+              {isEnabled && (
+                <View style={styles.enabledIndicator}>
+                  <Ionicons name="checkmark-circle" size={24} color={colors.success} />
+                  <Text style={styles.enabledText}>مفعل</Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
 
