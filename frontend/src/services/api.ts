@@ -864,22 +864,127 @@ export const teacherService = {
   },
 };
 
-// Notification service
-export const notificationService = {
+// Notification service - Updated to use Laravel FCM API
+export const notificationAPIService = {
+  // FCM Token Management
   async registerToken(tokenData: any) {
     try {
-      const response = await api.post('/v1/notifications/register-token', tokenData);
+      const response = await api.post('/v1/fcm/register-token', tokenData);
       return response.data;
     } catch (error) {
       console.error('Register token error:', error);
-      // Don't throw error, just log it
       return { success: false };
+    }
+  },
+
+  async unregisterToken(token: string) {
+    try {
+      const response = await api.post('/v1/fcm/unregister-token', { token });
+      return response.data;
+    } catch (error) {
+      console.error('Unregister token error:', error);
+      return { success: false };
+    }
+  },
+
+  async testNotification(token: string, title?: string, body?: string) {
+    try {
+      const response = await api.post('/v1/fcm/test-notification', {
+        token,
+        title: title || 'إشعار تجريبي',
+        body: body || 'هذا إشعار تجريبي من تطبيق جمعية تحفيظ القرآن الكريم'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Test notification error:', error);
+      return { success: false };
+    }
+  },
+
+  // Guardian/Teacher specific notification endpoints
+  async getNotifications() {
+    try {
+      const userType = await AsyncStorage.getItem('user_type');
+      const endpoint = userType === 'parent' 
+        ? '/v1/guardian/notifications' 
+        : '/v1/teacher/notifications';
+      
+      const response = await api.get(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Get notifications error:', error);
+      return { success: false, data: [] };
+    }
+  },
+
+  async getUnreadCount() {
+    try {
+      const userType = await AsyncStorage.getItem('user_type');
+      const endpoint = userType === 'parent' 
+        ? '/v1/guardian/notifications/unread-count' 
+        : '/v1/teacher/notifications/unread-count';
+      
+      const response = await api.get(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Get unread count error:', error);
+      return { success: false, count: 0 };
+    }
+  },
+
+  async markAsRead(notificationId: string) {
+    try {
+      const userType = await AsyncStorage.getItem('user_type');
+      const endpoint = userType === 'parent' 
+        ? `/v1/guardian/notifications/${notificationId}/read`
+        : `/v1/teacher/notifications/${notificationId}/read`;
+      
+      const response = await api.put(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Mark as read error:', error);
+      return { success: false };
+    }
+  },
+
+  async markAllAsRead() {
+    try {
+      const userType = await AsyncStorage.getItem('user_type');
+      const endpoint = userType === 'parent' 
+        ? '/v1/guardian/notifications/mark-all-read'
+        : '/v1/teacher/notifications/mark-all-read';
+      
+      const response = await api.put(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Mark all as read error:', error);
+      return { success: false };
+    }
+  },
+
+  async getNotificationSettings() {
+    try {
+      const userType = await AsyncStorage.getItem('user_type');
+      const endpoint = userType === 'parent' 
+        ? '/v1/guardian/notifications/settings'
+        : '/v1/teacher/notifications/settings';
+      
+      const response = await api.get(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Get notification settings error:', error);
+      return { success: false, data: {} };
     }
   },
 
   async updateNotificationSettings(settings: any) {
     try {
-      const response = await api.put('/v1/notifications/settings', settings);
+      const userType = await AsyncStorage.getItem('user_type');
+      const endpoint = userType === 'parent' 
+        ? '/v1/guardian/notifications/settings'
+        : '/v1/teacher/notifications/settings';
+      
+      const response = await api.put(endpoint, settings);
       return response.data;
     } catch (error) {
       console.error('Update notification settings error:', error);
@@ -887,58 +992,51 @@ export const notificationService = {
     }
   },
 
-  async getNotificationHistory() {
+  // Admin endpoints for sending notifications
+  async sendToTeachers(title: string, body: string, data?: any) {
     try {
-      const response = await api.get('/v1/notifications/history');
-      return response.data;
-    } catch (error) {
-      console.error('Get notification history error:', error);
-      return { success: false, data: [] };
-    }
-  },
-
-  async markNotificationAsRead(notificationId: string) {
-    try {
-      const response = await api.put(`/v1/notifications/${notificationId}/read`);
-      return response.data;
-    } catch (error) {
-      console.error('Mark notification as read error:', error);
-      return { success: false };
-    }
-  },
-
-  // Send attendance notification
-  async sendAttendanceNotification(studentId: number, attendanceData: any) {
-    try {
-      const response = await api.post(`/v1/notifications/attendance/${studentId}`, attendanceData);
-      return response.data;
-    } catch (error) {
-      console.error('Send attendance notification error:', error);
-      return { success: false };
-    }
-  },
-
-  // Send session reminder
-  async sendSessionReminder(sessionId: number, reminderTime: string) {
-    try {
-      const response = await api.post(`/v1/notifications/session-reminder/${sessionId}`, {
-        reminder_time: reminderTime
+      const response = await api.post('/v1/fcm/send-to-teachers', {
+        title, body, data: data || {}
       });
       return response.data;
     } catch (error) {
-      console.error('Send session reminder error:', error);
+      console.error('Send to teachers error:', error);
       return { success: false };
     }
   },
 
-  // Send message notification
-  async sendMessageNotification(recipientId: number, messageData: any) {
+  async sendToGuardians(title: string, body: string, data?: any) {
     try {
-      const response = await api.post(`/v1/notifications/message/${recipientId}`, messageData);
+      const response = await api.post('/v1/fcm/send-to-guardians', {
+        title, body, data: data || {}
+      });
       return response.data;
     } catch (error) {
-      console.error('Send message notification error:', error);
+      console.error('Send to guardians error:', error);
       return { success: false };
+    }
+  },
+
+  async sendToStudentGuardians(studentIds: number[], title: string, body: string, data?: any) {
+    try {
+      const response = await api.post('/v1/fcm/send-to-student-guardians', {
+        student_ids: studentIds, title, body, data: data || {}
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Send to student guardians error:', error);
+      return { success: false };
+    }
+  },
+
+  // Device statistics
+  async getDeviceStats() {
+    try {
+      const response = await api.get('/v1/fcm/device-stats');
+      return response.data;
+    } catch (error) {
+      console.error('Get device stats error:', error);
+      return { success: false, data: {} };
     }
   },
 };
