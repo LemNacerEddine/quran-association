@@ -15,7 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "dz.vpdeveloper.quran_association"
+      "bundleIdentifier": "dz.vpdeveloper.quran-association",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"],
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
