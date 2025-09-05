@@ -260,8 +260,9 @@ class NotificationService {
 
       const user = JSON.parse(userData);
 
-      // استخدام Laravel FCM API endpoint الجاهز
-      await api.post('/v1/fcm/register-token', {
+      // استخدام API endpoint الجديد
+      const apiClient = (await import('./api')).default;
+      await apiClient.post('/v1/fcm/register-token', {
         token,
         user_id: user.id,
         user_type: userType === 'parent' ? 'guardian' : 'teacher',
@@ -270,9 +271,10 @@ class NotificationService {
         app_version: Constants.expoConfig?.version || '1.0.0',
       });
 
-      console.log('✅ Token registered with Laravel FCM API successfully');
+      console.log('✅ Token registered successfully with backend');
     } catch (error) {
       console.error('❌ Failed to register token with server:', error);
+      console.log('🔄 Will try again when user logs in');
     }
   }
 
