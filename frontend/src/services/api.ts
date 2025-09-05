@@ -377,33 +377,37 @@ export const parentService = {
       } catch (apiError) {
         console.log('NEW API children failed, using fallback data');
         
-        // Return test data
-        return [
-          {
-            id: 1,
-            name: 'عبدالرحمن أحمد',
-            age: 12,
-            circle_name: 'حلقة النور',
-            teacher_name: 'أحمد محمد الأستاذ',
-            attendance_rate: 95,
-            memorization_points: 150,
-            total_points: 240,
-            level: 'الجزء الثالث',
-            recent_activity: 'حفظ سورة آل عمران'
-          },
-          {
-            id: 2,
-            name: 'فاطمة أحمد',
-            age: 10,
-            circle_name: 'حلقة الهدى',
-            teacher_name: 'أحمد محمد الأستاذ',
-            attendance_rate: 88,
-            memorization_points: 120,
-            total_points: 180,
-            level: 'الجزء الثاني',
-            recent_activity: 'مراجعة سورة البقرة'
+        // Get user data from localStorage to determine which guardian
+        const userData = await AsyncStorage.getItem('user_data');
+        if (userData) {
+          const user = JSON.parse(userData);
+          const guardian = REAL_GUARDIANS.find(g => g.id === user.id);
+          
+          if (guardian && guardian.students) {
+            return guardian.students.map(student => {
+              // Calculate mock stats based on real student data
+              const baseAttendance = 85 + (student.id * 2);
+              const baseMemorization = 120 + (student.id * 20);
+              const baseTotalPoints = 180 + (student.id * 30);
+              
+              return {
+                id: student.id,
+                name: student.name,
+                age: student.age,
+                circle_name: 'حلقة تحفيظ القرآن الكريم - المستوى المتوسط',
+                teacher_name: 'أحمد محمد الأستاذ',
+                attendance_rate: Math.min(baseAttendance, 100),
+                memorization_points: baseMemorization,
+                total_points: baseTotalPoints,
+                level: student.education_level === 'ابتدائي' ? 'الجزء الأول والثاني' : 'الجزء الثالث',
+                recent_activity: student.gender === 'male' ? 'حفظ سورة آل عمران' : 'مراجعة سورة البقرة'
+              };
+            });
           }
-        ];
+        }
+
+        // Return empty array if user not found
+        return [];
       }
     } catch (error) {
       console.error('Get children error:', error);
