@@ -147,7 +147,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "API Integration Fix - Parent Interface"
+    - "Attendance Notification System Implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
