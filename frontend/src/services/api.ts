@@ -302,30 +302,48 @@ export const parentService = {
       } catch (apiError) {
         console.log('NEW API dashboard failed, using fallback data');
         
-        // Return test data
+        // Get user data from localStorage to determine which guardian
+        const userData = await AsyncStorage.getItem('user_data');
+        if (userData) {
+          const user = JSON.parse(userData);
+          const guardian = REAL_GUARDIANS.find(g => g.id === user.id);
+          
+          if (guardian && guardian.students) {
+            const childrenData = guardian.students.map(student => {
+              // Calculate mock stats based on student data
+              const baseAttendance = 85 + (student.id * 2); // Different attendance for each student
+              const basePoints = 150 + (student.id * 30);
+              
+              return {
+                id: student.id,
+                name: student.name,
+                circle_name: 'حلقة تحفيظ القرآن الكريم - المستوى المتوسط',
+                attendance_rate: Math.min(baseAttendance, 100),
+                total_points: basePoints,
+                status: baseAttendance >= 90 ? 'excellent' : 
+                       baseAttendance >= 80 ? 'good' : 
+                       baseAttendance >= 70 ? 'average' : 'needs_improvement'
+              };
+            });
+
+            return {
+              children: childrenData,
+              stats: {
+                total_children: childrenData.length,
+                average_attendance: Math.round(childrenData.reduce((sum, child) => sum + child.attendance_rate, 0) / childrenData.length),
+                total_points: childrenData.reduce((sum, child) => sum + child.total_points, 0)
+              }
+            };
+          }
+        }
+
+        // Return default data if user not found
         return {
-          children: [
-            {
-              id: 1,
-              name: 'عبدالرحمن أحمد',
-              circle_name: 'حلقة النور',
-              attendance_rate: 95,
-              total_points: 240,
-              status: 'excellent'
-            },
-            {
-              id: 2,
-              name: 'فاطمة أحمد',
-              circle_name: 'حلقة الهدى',
-              attendance_rate: 88,
-              total_points: 180,
-              status: 'good'
-            }
-          ],
+          children: [],
           stats: {
-            total_children: 2,
-            average_attendance: 91,
-            total_points: 420
+            total_children: 0,
+            average_attendance: 0,
+            total_points: 0
           }
         };
       }
