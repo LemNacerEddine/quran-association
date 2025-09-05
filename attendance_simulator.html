@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاكي تسجيل الحضور - جمعية تحفيظ القرآن الكريم</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #2E8B57, #3CB371);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2E8B57;
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+        }
+        
+        .status-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .status-btn {
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .status-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .status-btn.present {
+            border-color: #28a745;
+            color: #28a745;
+        }
+        
+        .status-btn.present.active {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-btn.absent {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        
+        .status-btn.absent.active {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status-btn.late {
+            border-color: #ffc107;
+            color: #ffc107;
+        }
+        
+        .status-btn.late.active {
+            background: #ffc107;
+            color: white;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #2E8B57, #3CB371);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(46, 139, 87, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .student-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .student-info h3 {
+            color: #2E8B57;
+            margin-bottom: 10px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .info-row span:first-child {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+            margin-left: 8px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .submitting {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕌 محاكي تسجيل الحضور</h1>
+            <p>جمعية تحفيظ القرآن الكريم - نظام إدارة الحضور</p>
+        </div>
+        
+        <div class="form-container">
+            <form id="attendanceForm">
+                <div class="form-group">
+                    <label for="studentSelect">اختر الطالب:</label>
+                    <select id="studentSelect" required>
+                        <option value="">-- اختر الطالب --</option>
+                        <option value="1">عبدالرحمن أحمد (ابن أحمد عبدالله)</option>
+                        <option value="2">فاطمة محمد (ابنة محمد حسن)</option>
+                        <option value="3">محمد علي (ابن علي أحمد)</option>
+                        <option value="4">عائشة سالم (ابنة سالم محمد)</option>
+                        <option value="5">يوسف إبراهيم (ابن إبراهيم يوسف)</option>
+                    </select>
+                </div>
+                
+                <div id="studentInfo" class="student-info" style="display: none;">
+                    <h3>معلومات الطالب</h3>
+                    <div class="info-row">
+                        <span>الاسم:</span>
+                        <span id="studentName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span>العمر:</span>
+                        <span id="studentAge">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span>ولي الأمر:</span>
+                        <span id="guardianName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span>رقم الهاتف:</span>
+                        <span id="guardianPhone">-</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>حالة الحضور:</label>
+                    <div class="status-buttons">
+                        <button type="button" class="status-btn present" data-status="present">
+                            <span class="emoji">✅</span> حاضر
+                        </button>
+                        <button type="button" class="status-btn absent" data-status="absent">
+                            <span class="emoji">❌</span> غائب
+                        </button>
+                        <button type="button" class="status-btn late" data-status="late">
+                            <span class="emoji">⏰</span> متأخر
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">ملاحظات (اختيارية):</label>
+                    <textarea id="notes" rows="3" placeholder="أضف أي ملاحظات حول حضور الطالب..."></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    📝 تسجيل الحضور وإرسال الإشعار
+                </button>
+                
+                <div class="loading" id="loading">
+                    🔄 جاري تسجيل الحضور وإرسال الإشعار...
+                </div>
+                
+                <div class="result" id="result"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Student data matching backend
+        const studentsData = {
+            1: { name: "عبدالرحمن أحمد", age: 12, guardian: "أحمد عبدالله", phone: "0501234567" },
+            2: { name: "فاطمة محمد", age: 11, guardian: "محمد حسن", phone: "0501234568" },
+            3: { name: "محمد علي", age: 13, guardian: "علي أحمد", phone: "0501234569" },
+            4: { name: "عائشة سالم", age: 10, guardian: "سالم محمد", phone: "0501234570" },
+            5: { name: "يوسف إبراهيم", age: 14, guardian: "إبراهيم يوسف", phone: "0501234571" }
+        };
+
+        let selectedStatus = '';
+
+        // Student selection handler
+        document.getElementById('studentSelect').addEventListener('change', function() {
+            const studentId = this.value;
+            const studentInfo = document.getElementById('studentInfo');
+            
+            if (studentId && studentsData[studentId]) {
+                const student = studentsData[studentId];
+                document.getElementById('studentName').textContent = student.name;
+                document.getElementById('studentAge').textContent = student.age + ' سنة';
+                document.getElementById('guardianName').textContent = student.guardian;
+                document.getElementById('guardianPhone').textContent = student.phone;
+                studentInfo.style.display = 'block';
+            } else {
+                studentInfo.style.display = 'none';
+            }
+        });
+
+        // Status button handlers
+        document.querySelectorAll('.status-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                selectedStatus = this.dataset.status;
+            });
+        });
+
+        // Form submission
+        document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const studentId = document.getElementById('studentSelect').value;
+            const notes = document.getElementById('notes').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            if (!studentId) {
+                showResult('يرجى اختيار الطالب', 'error');
+                return;
+            }
+            
+            if (!selectedStatus) {
+                showResult('يرجى اختيار حالة الحضور', 'error');
+                return;
+            }
+            
+            // Show loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('submitting');
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            try {
+                // Call the attendance API
+                const response = await fetch('https://quran-connect-2.preview.emergentagent.com/api/mobile/attendance/mark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        student_id: parseInt(studentId),
+                        status: selectedStatus,
+                        notes: notes
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const student = studentsData[studentId];
+                    const statusText = {
+                        'present': 'حاضر ✅',
+                        'absent': 'غائب ❌', 
+                        'late': 'متأخر ⏰'
+                    }[selectedStatus];
+                    
+                    showResult(
+                        `تم تسجيل الحضور بنجاح! 🎉\n\n` +
+                        `الطالب: ${student.name}\n` +
+                        `الحالة: ${statusText}\n` +
+                        `تم إرسال إشعار إلى ولي الأمر: ${student.guardian} (${student.phone})\n\n` +
+                        `${data.data.notification.body}`,
+                        'success'
+                    );
+                    
+                    // Reset form
+                    setTimeout(() => {
+                        this.reset();
+                        selectedStatus = '';
+                        document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+                        document.getElementById('studentInfo').style.display = 'none';
+                    }, 3000);
+                } else {
+                    showResult('خطأ: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showResult('حدث خطأ في الاتصال بالخادم: ' + error.message, 'error');
+            } finally {
+                // Hide loading
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('submitting');
+                loading.style.display = 'none';
+            }
+        });
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.textContent = message;
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+            
+            // Auto hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    result.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
