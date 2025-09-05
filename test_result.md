@@ -147,7 +147,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Laravel API Endpoints Investigation"
     - "API Integration Fix - Parent Interface"
   stuck_tasks: []
   test_all: false
