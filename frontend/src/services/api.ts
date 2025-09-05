@@ -599,11 +599,8 @@ export const teacherService = {
   async getDashboard() {
     try {
       try {
-        // Get circles and students data from NEW API
-        const [circlesResponse, studentsResponse] = await Promise.all([
-          api.get('/v1/teacher/circles'),
-          api.get('/v1/teacher/students')
-        ]);
+        // Get dashboard data from Laravel mobile API
+        const dashboardResponse = await api.get('/mobile/teacher/dashboard');
         
         if (circlesResponse.data.success && studentsResponse.data.success) {
           const circles = circlesResponse.data.data.circles || [];
