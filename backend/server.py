@@ -237,6 +237,169 @@ async def parent_child_details(child_id: int):
     
     return {"success": False, "message": "الطالب غير موجود"}
 
+# FCM Token Registration endpoint
+@api_router.post("/v1/fcm/register-token")
+async def register_fcm_token(request: dict):
+    """Register FCM token for push notifications"""
+    try:
+        # In real implementation, store token in database
+        # For now, just simulate success
+        token = request.get('token')
+        user_id = request.get('user_id')
+        user_type = request.get('user_type')
+        
+        if not token or not user_id:
+            return {
+                "success": False,
+                "message": "معرف المستخدم ورمز الجهاز مطلوبان"
+            }
+        
+        # Simulate storing token
+        print(f"📱 FCM Token registered: User {user_id} ({user_type}) - Token: {token[:20]}...")
+        
+        return {
+            "success": True,
+            "message": "تم تسجيل رمز الإشعارات بنجاح",
+            "data": {
+                "user_id": user_id,
+                "user_type": user_type,
+                "token_registered": True
+            }
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"خطأ في تسجيل الرمز: {str(e)}"
+        }
+
+# Simulate attendance marking and send notification
+@api_router.post("/mobile/attendance/mark")
+async def mark_attendance(request: dict):
+    """Mark attendance and send notification to parent"""
+    try:
+        student_id = request.get('student_id')
+        status = request.get('status', 'present')  # present, absent, late
+        notes = request.get('notes', '')
+        
+        if not student_id:
+            return {
+                "success": False,
+                "message": "معرف الطالب مطلوب"
+            }
+        
+        # Find student in our data
+        student = None
+        guardian_phone = None
+        
+        for phone, guardian_data in REAL_GUARDIANS_DATA.items():
+            for s in guardian_data['students']:
+                if s['id'] == student_id:
+                    student = s
+                    guardian_phone = phone
+                    break
+            if student:
+                break
+        
+        if not student:
+            return {
+                "success": False,
+                "message": "الطالب غير موجود"
+            }
+        
+        # Simulate attendance marking
+        attendance_record = {
+            "id": f"att_{student_id}_{datetime.now().strftime('%Y%m%d')}",
+            "student_id": student_id,
+            "student_name": student['name'],
+            "status": status,
+            "attendance_date": datetime.now().strftime('%Y-%m-%d'),
+            "attendance_time": datetime.now().strftime('%H:%M'),
+            "notes": notes,
+            "recorded_by": "teacher_system"
+        }
+        
+        # Send notification to parent (simulated)
+        notification_title = f"تسجيل حضور {student['name']}"
+        
+        if status == 'present':
+            notification_body = f"تم تسجيل حضور الطالب {student['name']} في جلسة اليوم"
+        elif status == 'absent':
+            notification_body = f"الطالب {student['name']} غائب عن جلسة اليوم"
+        elif status == 'late':
+            notification_body = f"الطالب {student['name']} متأخر عن جلسة اليوم"
+        else:
+            notification_body = f"تم تحديث حالة حضور الطالب {student['name']}"
+            
+        if notes:
+            notification_body += f"\nملاحظات: {notes}"
+        
+        print(f"🔔 Sending notification to parent ({guardian_phone}): {notification_title}")
+        print(f"📄 Message: {notification_body}")
+        
+        return {
+            "success": True,
+            "message": "تم تسجيل الحضور وإرسال الإشعار بنجاح",
+            "data": {
+                "attendance": attendance_record,
+                "notification_sent": True,
+                "notification": {
+                    "title": notification_title,
+                    "body": notification_body,
+                    "recipient": guardian_phone,
+                    "timestamp": datetime.now().isoformat()
+                }
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"خطأ في تسجيل الحضور: {str(e)}"
+        }
+
+# Send test notification endpoint
+@api_router.post("/mobile/notifications/send-test")
+async def send_test_notification(request: dict):
+    """Send a test notification"""
+    try:
+        user_id = request.get('user_id', 1)
+        title = request.get('title', 'إشعار تجريبي')
+        message = request.get('message', 'هذا إشعار تجريبي من الخادم')
+        
+        # Find user data
+        user_data = None
+        for phone, guardian_data in REAL_GUARDIANS_DATA.items():
+            if guardian_data['id'] == user_id:
+                user_data = guardian_data
+                break
+        
+        if not user_data:
+            return {
+                "success": False,
+                "message": "المستخدم غير موجود"
+            }
+        
+        print(f"🧪 Sending test notification to {user_data['name']} ({user_data['phone']})")
+        print(f"📧 Title: {title}")
+        print(f"💬 Message: {message}")
+        
+        return {
+            "success": True,
+            "message": "تم إرسال الإشعار التجريبي",
+            "data": {
+                "recipient": user_data['name'],
+                "title": title,
+                "message": message,
+                "sent_at": datetime.now().isoformat()
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"خطأ في إرسال الإشعار: {str(e)}"
+        }
+
 # Include the router in the main app (must be after all routes are defined)
 app.include_router(api_router)
 
