@@ -164,11 +164,11 @@ export const authService = {
     try {
       console.log('Attempting login with NEW API v1:', { phone, userType });
       
-      // Try NEW API v1 endpoints first
-      const endpoint = userType === 'parent' ? '/v1/guardian/login' : '/v1/teacher/login';
+      // Try Laravel mobile API endpoints
+      const endpoint = '/mobile/auth/login';
       const payload = userType === 'parent' 
-        ? { phone, access_code: password }
-        : { phone, password };
+        ? { phone, access_code: password, user_type: 'guardian' }
+        : { phone, password, user_type: 'teacher' };
 
       try {
         const response = await api.post(endpoint, payload);
