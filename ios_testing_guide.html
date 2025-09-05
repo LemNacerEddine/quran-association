@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تجربة التطبيق على iPhone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2E8B57 0%, #3CB371 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+            color: white;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .method {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .method h2 {
+            color: #FFD700;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .step {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-right: 4px solid #FFD700;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #FFD700;
+            color: #2E8B57;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #FFD700;
+            color: #2E8B57;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        .btn:hover {
+            background: #FFC107;
+            transform: scale(1.05);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .qr-container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .firebase-info {
+            background: rgba(255,193,7,0.2);
+            border: 1px solid #FFD700;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .firebase-info h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+        
+        .config-item {
+            margin: 8px 0;
+            font-family: monospace;
+            background: rgba(0,0,0,0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+        
+        .warning {
+            background: rgba(255,99,71,0.3);
+            border: 2px solid #FF6347;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .success {
+            background: rgba(50,205,50,0.3);
+            border: 2px solid #32CD32;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .code-block {
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            margin: 15px 0;
+            border-right: 4px solid #FFD700;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        
+        .credentials {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .credentials h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+        
+        .credential-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            margin-bottom: 8px;
+        }
+        
+        .copy-btn {
+            background: #FFD700;
+            color: #2E8B57;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍎 تجربة التطبيق على iPhone</h1>
+            <p>دليل شامل لتجربة تطبيق جمعية تحفيظ القرآن الكريم</p>
+        </div>
+
+        <div class="firebase-info">
+            <h3>📱 إعدادات Firebase تم تطبيقها بنجاح</h3>
+            <div class="config-item"><strong>Bundle ID:</strong> dz.vpdeveloper.quran-association</div>
+            <div class="config-item"><strong>App ID:</strong> 1:631091388007:ios:87a57829468e8ebb247ec2</div>
+            <div class="config-item"><strong>Project ID:</strong> quran-association</div>
+            <div class="config-item"><strong>Sender ID:</strong> 631091388007</div>
+        </div>
+
+        <div class="method">
+            <h2>🌐 الطريقة الأولى: التجربة المباشرة في Safari</h2>
+            <div class="step">
+                <span class="step-number">1</span>
+                افتح Safari على الآيفون
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                اذهب إلى الرابط التالي:
+                <div class="code-block">https://quran-connect-2.preview.emergentagent.com</div>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                اضغط على أيقونة المشاركة ثم "إضافة إلى الشاشة الرئيسية" للحصول على تجربة أقرب للتطبيق الأصلي
+            </div>
+            <a href="https://quran-connect-2.preview.emergentagent.com" class="btn" target="_blank">
+                فتح التطبيق الآن
+            </a>
+        </div>
+
+        <div class="method">
+            <h2>📱 الطريقة الثانية: Expo Go (الأفضل للتطوير)</h2>
+            <div class="step">
+                <span class="step-number">1</span>
+                حمل تطبيق Expo Go من App Store
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                افتح Expo Go وامسح QR Code أو أدخل الرابط:
+                <div class="code-block">exp://quran-connect-2.preview.emergentagent.com</div>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                استمتع بالتجربة الكاملة مع الإشعارات والميزات المتقدمة
+            </div>
+            <a href="https://apps.apple.com/app/expo-go/id982107779" class="btn">
+                تحميل Expo Go
+            </a>
+            <a href="exp://quran-connect-2.preview.emergentagent.com" class="btn btn-secondary">
+                فتح في Expo Go
+            </a>
+        </div>
+
+        <div class="method">
+            <h2>🔨 الطريقة الثالثة: Build مخصص للجهاز</h2>
+            <div class="warning">
+                <strong>ملاحظة:</strong> هذه الطريقة تحتاج حساب Apple Developer ($99/سنة) وأدوات تطوير متقدمة
+            </div>
+            <div class="step">
+                <span class="step-number">1</span>
+                تحتاج إلى حساب Expo مع EAS Build
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                بناء التطبيق باستخدام:
+                <div class="code-block">eas build --platform ios --profile development</div>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                تثبيت التطبيق على الجهاز باستخدام TestFlight أو Xcode
+            </div>
+        </div>
+
+        <div class="success">
+            <h3>✅ الميزات المتاحة للاختبار:</h3>
+            <ul style="margin-right: 20px; margin-top: 10px;">
+                <li>🔐 تسجيل الدخول لأولياء الأمور والمعلمين</li>
+                <li>📊 لوحة تحكم شاملة</li>
+                <li>👨‍👩‍👧‍👦 متابعة تفاصيل الأطفال</li>
+                <li>📅 سجل الحضور والأداء</li>
+                <li>🔔 نظام الإشعارات (يعمل بشكل كامل مع Expo Go)</li>
+                <li>🌐 واجهة عربية كاملة مع RTL</li>
+                <li>📱 تصميم متجاوب للآيفون</li>
+            </ul>
+        </div>
+
+        <div class="credentials">
+            <h3>🔑 بيانات تسجيل الدخول للاختبار</h3>
+            <div class="credential-row">
+                <span><strong>أحمد عبدالله (ولي أمر):</strong> 0501234567 / 4567</span>
+                <button class="copy-btn" onclick="copyToClipboard('0501234567')">نسخ الرقم</button>
+            </div>
+            <div class="credential-row">
+                <span><strong>محمد حسن (ولي أمر):</strong> 0501234568 / 4568</span>
+                <button class="copy-btn" onclick="copyToClipboard('0501234568')">نسخ الرقم</button>
+            </div>
+            <div class="credential-row">
+                <span><strong>أستاذ أحمد (معلم):</strong> 0501234888 / 4888</span>
+                <button class="copy-btn" onclick="copyToClipboard('0501234888')">نسخ الرقم</button>
+            </div>
+        </div>
+
+        <div class="method">
+            <h2>🧪 اختبار الإشعارات</h2>
+            <div class="step">
+                <span class="step-number">1</span>
+                سجل دخول كولي أمر في التطبيق
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                في نافذة منفصلة، افتح محاكي تسجيل الحضور:
+                <div class="code-block">https://quran-connect-2.preview.emergentagent.com/attendance_simulator.html</div>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                سجل حضور أحد الأطفال وراقب الإشعار في التطبيق
+            </div>
+            <a href="https://quran-connect-2.preview.emergentagent.com/attendance_simulator.html" class="btn btn-secondary" target="_blank">
+                فتح محاكي الحضور
+            </a>
+        </div>
+
+        <div class="firebase-info">
+            <h3>💡 نصائح للاختبار الأمثل:</h3>
+            <ul style="margin-right: 20px; margin-top: 10px;">
+                <li>استخدم Expo Go للحصول على تجربة الإشعارات الكاملة</li>
+                <li>اختبر التطبيق في الوضع العمودي والأفقي</li>
+                <li>جرب جميع الميزات: تسجيل الدخول، التنقل، التفاصيل</li>
+                <li>اختبر الإشعارات بتسجيل الحضور من المحاكي</li>
+                <li>جرب التطبيق مع اتصال الإنترنت وبدونه</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('تم نسخ الرقم: ' + text);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('تم نسخ الرقم: ' + text);
+            });
+        }
+    </script>
+</body>
+</html>
