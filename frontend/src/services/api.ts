@@ -419,7 +419,7 @@ export const parentService = {
   async getChildDetails(childId: number) {
     try {
       try {
-        const response = await api.get(`/v1/guardian/students/${childId}`);
+        const response = await api.get(`/mobile/parent/children/${childId}`);
         
         if (response.data.success && response.data.data) {
           const student = response.data.data.student;
