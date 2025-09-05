@@ -415,6 +415,15 @@ const styles = StyleSheet.create({
     ...typography.body2,
     color: colors.textSecondary,
   },
+  tokenInfo: {
+    ...typography.caption,
+    color: colors.gray600,
+    marginTop: 4,
+    fontFamily: 'monospace',
+  },
+  statusActions: {
+    alignItems: 'center',
+  },
   enableButton: {
     backgroundColor: colors.primary,
     paddingHorizontal: 16,
@@ -424,6 +433,15 @@ const styles = StyleSheet.create({
   enableButtonText: {
     ...typography.body2,
     color: colors.white,
+    fontWeight: '600',
+  },
+  enabledIndicator: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  enabledText: {
+    ...typography.caption,
+    color: colors.success,
     fontWeight: '600',
   },
   sectionContainer: {
