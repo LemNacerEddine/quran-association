@@ -11,8 +11,7 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import requests
 import asyncio
-import mysql.connector
-from mysql.connector import Error
+# MySQL connection will be added later if needed
 import os
 from datetime import datetime, timedelta
 import hashlib
