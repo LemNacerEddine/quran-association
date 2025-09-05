@@ -261,9 +261,9 @@ export const authService = {
 export const parentService = {
   async getDashboard() {
     try {
-      // Try NEW API v1 first
+      // Try Laravel mobile API first
       try {
-        const response = await api.get('/v1/guardian/students');
+        const response = await api.get('/mobile/parent/dashboard');
         
         if (response.data.success && response.data.data) {
           const students = response.data.data.students;
