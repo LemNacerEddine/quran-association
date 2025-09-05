@@ -334,15 +334,28 @@ class NotificationService {
   async getNotificationSettings(): Promise<any> {
     try {
       const settings = await Notifications.getPermissionsAsync();
+      const hasToken = this.expoPushToken !== null;
+      
       return {
-        granted: settings.status === 'granted',
+        granted: settings.status === 'granted' || hasToken,
         canAskAgain: settings.canAskAgain,
+        status: settings.status,
         ios: settings.ios,
         android: settings.android,
+        hasToken,
+        platform: Platform.OS,
+        isDevice: Device.isDevice,
       };
     } catch (error) {
       console.error('❌ Failed to get notification settings:', error);
-      return null;
+      return {
+        granted: false,
+        canAskAgain: true,
+        status: 'undetermined',
+        hasToken: false,
+        platform: Platform.OS,
+        isDevice: Device.isDevice,
+      };
     }
   }
 
