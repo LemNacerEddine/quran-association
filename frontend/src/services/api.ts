@@ -195,39 +195,41 @@ export const authService = {
       } catch (apiError: any) {
         console.log('NEW API failed, trying fallback data:', apiError.response?.data?.message);
         
-        // Fallback to test data
+      // Fallback to real data from database
         if (userType === 'parent') {
-          const guardian = TEST_GUARDIANS.find(g => g.phone === phone && g.access_code === password);
+          const guardian = REAL_GUARDIANS.find(g => g.phone === phone && g.access_code === password);
           if (guardian) {
             const userData = {
-              id: 1,
+              id: guardian.id,
               name: guardian.name,
               phone: guardian.phone,
+              email: guardian.email,
               type: 'parent' as const,
             };
             
             return {
               success: true,
               data: {
-                token: 'test-token-' + Date.now(),
+                token: 'real-token-' + Date.now(),
                 user: userData,
               },
             };
           }
         } else if (userType === 'teacher') {
-          const teacher = TEST_TEACHERS.find(t => t.phone === phone && t.password === password);
+          const teacher = REAL_TEACHERS.find(t => t.phone === phone && t.password === password);
           if (teacher) {
             const userData = {
-              id: 1,
+              id: teacher.id,
               name: teacher.name,
               phone: teacher.phone,
+              email: teacher.email,
               type: 'teacher' as const,
             };
             
             return {
               success: true,
               data: {
-                token: 'test-token-' + Date.now(),
+                token: 'real-token-' + Date.now(),
                 user: userData,
               },
             };
