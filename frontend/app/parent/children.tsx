@@ -69,6 +69,10 @@ export default function ChildrenScreen() {
     return colors.error;
   };
 
+  const navigateToChildDetails = (childId: number) => {
+    router.push(`/parent/child-details/${childId}`);
+  };
+
   if (isLoading) {
     return <LoadingScreen />;
   }
