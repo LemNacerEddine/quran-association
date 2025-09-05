@@ -266,7 +266,8 @@ export const parentService = {
         const response = await api.get('/mobile/parent/dashboard');
         
         if (response.data.success && response.data.data) {
-          const students = response.data.data.students;
+          const dashboardData = response.data.data;
+          const students = dashboardData.children || dashboardData.students || [];
           
           // Calculate stats from students data
           const totalChildren = students.length;
