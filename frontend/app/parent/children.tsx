@@ -155,7 +155,10 @@ export default function ChildrenScreen() {
               )}
 
               <View style={styles.cardFooter}>
-                <TouchableOpacity style={styles.actionButton}>
+                <TouchableOpacity 
+                  style={styles.actionButton}
+                  onPress={() => navigateToChildDetails(child.id)}
+                >
                   <Text style={styles.actionButtonText}>عرض التفاصيل</Text>
                   <Ionicons name="chevron-forward" size={16} color={colors.primary} />
                 </TouchableOpacity>
