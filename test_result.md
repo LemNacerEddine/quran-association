@@ -106,16 +106,19 @@ user_problem_statement: "المستخدم يريد إصلاح مشكلة عرض 
 
 backend:
   - task: "Laravel API Endpoints Investigation"
-    implemented: false
-    working: false
-    file: "external_laravel_api"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "main"
         comment: "Laravel API endpoint `/v1/guardian/login` returns 404. Need to investigate actual endpoints structure"
+      - working: true
+        agent: "testing"
+        comment: "FIXED AND TESTED SUCCESSFULLY: The issue was that FastAPI routes were defined AFTER the router was included in the app. Fixed by moving app.include_router(api_router) to the end of server.py after all routes are defined. All 4 Laravel API proxy endpoints are now working: /api/mobile/auth/login (login), /api/mobile/parent/dashboard (dashboard), /api/mobile/parent/children (children list), /api/mobile/parent/children/{child_id} (child details). Comprehensive testing with 11 tests shows 100% success rate. Ahmed Abdullah (0501234567/4567) and Mohammed Hassan (0501234568/4568) login correctly, security validation works, and all endpoints return consistent real database data."
 
 frontend:
   - task: "API Integration Fix - Parent Interface"
