@@ -497,7 +497,7 @@ export const parentService = {
   async getChildAttendance(childId: number) {
     try {
       try {
-        const response = await api.get(`/v1/guardian/students/${childId}/attendance`);
+        const response = await api.get(`/mobile/parent/children/${childId}/attendance`);
         
         if (response.data.success && response.data.data) {
           return response.data.data.attendance_records.map((record: any) => ({
