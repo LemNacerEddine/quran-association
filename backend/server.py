@@ -237,6 +237,9 @@ async def parent_child_details(child_id: int):
     
     return {"success": False, "message": "الطالب غير موجود"}
 
+# Include the router in the main app (must be after all routes are defined)
+app.include_router(api_router)
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
