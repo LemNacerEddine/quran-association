@@ -357,7 +357,7 @@ export const parentService = {
   async getChildren() {
     try {
       try {
-        const response = await api.get('/v1/guardian/students');
+        const response = await api.get('/mobile/parent/children');
         
         if (response.data.success && response.data.data) {
           const students = response.data.data.students;
