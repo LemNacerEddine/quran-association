@@ -54,17 +54,108 @@ api.interceptors.response.use(
   }
 );
 
-// Test credentials from database
-const TEST_GUARDIANS = [
-  { phone: '0501234567', access_code: '4567', name: 'أحمد عبدالله' },
-  { phone: '0501234568', access_code: '4568', name: 'محمد حسن' },
-  { phone: '0501234569', access_code: '4569', name: 'علي أحمد' },
-  { phone: '0501234570', access_code: '4570', name: 'سالم محمد' },
-  { phone: '0501234571', access_code: '4571', name: 'إبراهيم يوسف' },
+// Real credentials from database
+const REAL_GUARDIANS = [
+  { 
+    id: 1, 
+    phone: '0501234567', 
+    access_code: '4567', 
+    name: 'أحمد عبدالله',
+    email: 'ahmed.parent@gmail.com',
+    students: [
+      {
+        id: 1,
+        name: 'عبدالرحمن أحمد',
+        age: 12,
+        gender: 'male',
+        education_level: 'ابتدائي',
+        birth_date: '2012-03-15',
+        notes: 'طالب متميز في الحفظ والتلاوة'
+      }
+    ]
+  },
+  { 
+    id: 2, 
+    phone: '0501234568', 
+    access_code: '4568', 
+    name: 'محمد حسن',
+    email: 'mohammed.parent@gmail.com',
+    students: [
+      {
+        id: 2,
+        name: 'فاطمة محمد',
+        age: 11,
+        gender: 'female',
+        education_level: 'ابتدائي',
+        birth_date: '2013-07-22',
+        notes: 'طالبة مجتهدة ومنتظمة في الحضور'
+      }
+    ]
+  },
+  { 
+    id: 3, 
+    phone: '0501234569', 
+    access_code: '4569', 
+    name: 'علي أحمد',
+    email: 'ali.parent@gmail.com',
+    students: [
+      {
+        id: 3,
+        name: 'محمد علي',
+        age: 13,
+        gender: 'male',
+        education_level: 'ابتدائي',
+        birth_date: '2011-11-08',
+        notes: 'طالب نشط ومتفاعل في الحلقة'
+      }
+    ]
+  },
+  { 
+    id: 4, 
+    phone: '0501234570', 
+    access_code: '4570', 
+    name: 'سالم محمد',
+    email: 'salem.parent@gmail.com',
+    students: [
+      {
+        id: 4,
+        name: 'عائشة سالم',
+        age: 10,
+        gender: 'female',
+        education_level: 'ابتدائي',
+        birth_date: '2014-01-30',
+        notes: 'طالبة بحاجة لمزيد من التشجيع'
+      }
+    ]
+  },
+  { 
+    id: 5, 
+    phone: '0501234571', 
+    access_code: '4571', 
+    name: 'إبراهيم يوسف',
+    email: 'ibrahim.parent@gmail.com',
+    students: [
+      {
+        id: 5,
+        name: 'يوسف إبراهيم',
+        age: 14,
+        gender: 'male',
+        education_level: 'ابتدائي',
+        birth_date: '2010-09-12',
+        notes: 'طالب ذكي لكن يحتاج لمزيد من الانتظام'
+      }
+    ]
+  }
 ];
 
-const TEST_TEACHERS = [
-  { phone: '0501234888', password: '4888', name: 'أحمد محمد الأستاذ' },
+const REAL_TEACHERS = [
+  { 
+    id: 1,
+    phone: '0501234888', 
+    password: '4888', 
+    name: 'أحمد محمد الأستاذ',
+    email: 'teacher@example.com'
+  },
 ];
 
 // Auth service
