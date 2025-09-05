@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, List
 
 # Get the API base URL from frontend environment
-API_BASE_URL = "https://vpdeveloper.dz/quran-association/api"
+API_BASE_URL = "https://quran-connect-2.preview.emergentagent.com/api"
 
 class QuranAssociationAPITester:
     def __init__(self):
