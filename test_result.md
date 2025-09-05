@@ -101,3 +101,49 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "المستخدم يريد إصلاح مشكلة عرض البيانات التجريبية بدلاً من البيانات الحقيقية من Laravel API. المستخدم ذكر أن 'فاطمة أحمد ليست من أطفال أحمد عبدالله' مما يعني أن التطبيق يعرض بيانات خاطئة. التركيز على واجهة أولياء الأمور أولاً."
+
+backend:
+  - task: "Laravel API Endpoints Investigation"
+    implemented: false
+    working: false
+    file: "external_laravel_api"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Laravel API endpoint `/v1/guardian/login` returns 404. Need to investigate actual endpoints structure"
+
+frontend:
+  - task: "API Integration Fix - Parent Interface"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/services/api.ts"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "App is using mock data fallback because API endpoints don't match Laravel project structure"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Laravel API Endpoints Investigation"
+    - "API Integration Fix - Parent Interface"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Found mismatch between mobile app API calls and Laravel routes. App expects `/v1/guardian/login` but Laravel has `/mobile/auth/login`. Need to update mobile app to use correct endpoints."
